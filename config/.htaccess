@@ -1,0 +1,4 @@
+AuthUserFile C:\wamp\www\StoreDirectory\config\.htpasswd
+AuthName "Accès protégé"
+AuthType Basic
+Require valid-user
