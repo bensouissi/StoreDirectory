@@ -5,8 +5,8 @@
  * Date: 26/12/2016
  * Time: 10:55
  */
-include("../Crafting/Article.php");
-include("../Crafting/Store.php");
+include_once("../Crafting/Article.php");
+include_once("../Crafting/Store.php");
 class ArticleData {
     private $cfg;
     private $dbh;
@@ -22,17 +22,19 @@ class ArticleData {
     public function insertDB(){
         try{
             $store_access = new StoreData($this->article->store);
-            $query = "INSERT INTO article (ukey,code,name,price,sale_per,store_ukey) VALUES (:ukey,:code,:name,:price,:sale_per,:store_ukey)";
+            $query = "INSERT INTO article (ukey,code,description,date_added,name,price,type,store) VALUES (:ukey,:code,:description,:date_added,:name,:price,:type,:store)";
 
             $q = $this->dbh->prepare($query);
 
             if($q->execute(array(
                     'ukey'       => $this->GUID(),
                     'code'       => $this->article->code,
-                    'name'       => $this->article->name,
-                    'price'      => $this->article->price,
-                    'sale_per'   => $this->article->sale_percentage,
-                    'store_ukey' => $store_access->getUkey()
+                    'description'       => $this->article->name,
+                    'date_added'      => $this->article->price,
+                    'name'   => $this->article->sale_percentage,
+                    'price' => $store_access->getUkey(),
+                    'type' => $this->article->type,
+                    'store' => $this->article->store
                 )) == true)
                 return true;
             else
@@ -73,6 +75,22 @@ class ArticleData {
             return $row;
         }catch (PDOException $e){
             echo "Error: ".$e;
+        }
+    }
+
+    public function retrieveLatest(){
+        $query  = $this->dbh->query("select * from article where date_added >= DATEADD(day, -7, GETDATE() )");
+
+        $articles= array();
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $article= new Article();
+            $article->name = $row['name'];
+            $article->code = $row['code'];
+            $article->price = $row['price'];
+            $article->sale_percentage = $row['date_added'];
+            $article->type = $row['type'];
+            array_push($articles, $article);
+            return $articles;
         }
     }
 

@@ -6,8 +6,8 @@
  * Time: 10:56
  */
 
-include("../Crafting/Store.php");
-include("../DataAccess/ArticleData.php");
+include_once("../Crafting/Store.php");
+include_once("../DataAccess/ArticleData.php");
 
 class Article {
     public $code;
@@ -26,6 +26,19 @@ class Article {
         $instance = new self();
         $instance->fill($row);
         return $instance;
+    }
+    public static function NewestArticles(){
+        $data_access = new ArticleData();
+        echo json_encode(array("data" => $data_access->get_newest()));
+    }
+    public static function FeaturedArticles(){
+        $data_access = new ArticleData();
+        echo json_encode(array("data" => $data_access->get_featured()));
+    }
+
+    public static function TrustedArticles(){
+        $data_access = new ArticleData();
+        echo json_encode(array("data" => $data_access->get_special()));
     }
 
     private function fill(array $row)
@@ -76,7 +89,6 @@ class Article {
         }
         echo json_encode($flag);
     }
-
     /**
      * @return mixed
      */

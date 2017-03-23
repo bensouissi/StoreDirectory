@@ -7,11 +7,13 @@
  */
 include_once("../Crafting/Store.php");
 include_once ("../Crafting/Article.php");
+include_once ("../Crafting/User.php");
+include_once ("UserData.php");
 class StoreData {
     private $ukey;
     private $cfg;
     private $dbh;
-    public  $store;
+    public $store;
     private $articles = array();
 
     function __construct(Store $store)
@@ -23,19 +25,22 @@ class StoreData {
 
     public function insertDB(){
         try{
-            $requet = "INSERT INTO store (ukey,code,name,description,website,lat,longt,type) VALUES (:ukey,:code,:name,:description,:website,:lat,:longt,:type)";
+            $user = new User();
+            $user->code = $this->store->user;
+            $user_data = new UserData($user);
+
+            $requet = "INSERT INTO store (ukey,code,date_added,name,link,promotag,account_ukey) VALUES (:ukey,:code,:date_added,:name,:link,:promotag,:account_ukey)";
 
             $q = $this->dbh->prepare($requet);
 
             if($q->execute(array(
                     'ukey' => $this->GUID(),
                     'code' => $this->store->code,
+                    'date_added' => date("Y-m-d H:i:s"),
                     'name' => $this->store->name,
-                    'description' => $this->store->description,
-                    'website' => $this->store->website,
-                    'lat' => $this->store->lat,
-                    'longt' => $this->store->longt,
-                    'type' => $this->store->type
+                    'link' => $this->store->link,
+                    'promotag' => $this->store->promotag,
+                    'account_ukey' => $user_data->getUser()
 
                 )) == true)
                 return true;
@@ -60,8 +65,6 @@ class StoreData {
                 $store->code = $row['code'];
                 $store->description = $row['description'];
                 $store->website = $row['website'];
-                $store->lat = $row['lat'];
-                $store->longt = $row['longt'];
                 $store->type = $row['type'];
                 array_push($searched_stores, $store);
             }
@@ -135,6 +138,38 @@ class StoreData {
         }catch (PDOException $e){
             echo "ERROR: ".$e;
         }
+    }
+
+    //return true if the requested store is existent and fill the requested store with data
+    public function  checkStore(){
+
+        try{
+            $query=$this->dbh->query("select * from store where link= '".$this->store->link."'");
+
+            if($row = $query->fetch()){
+                $this->store->code = $row['code'];
+                $this->store->address = $row['adress'];
+                $this->store->date_added = $row['date_added'];
+                $this->store->name = $row['name'];
+                $this->store->website = $row['website'];
+                $this->store->promotag = $row['promotag'];
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        catch (PDOException $e){
+            echo "ERROR: ".$e;
+        }
+    }
+
+    public function checkLink(){
+        $query=$this->dbh->query("select * from store where link= '".$this->store->link."'");
+        if($row = $query->fetch())
+            return true;
+        else
+            return false;
     }
 
 

@@ -5,7 +5,7 @@
  * Date: 26/12/2016
  * Time: 11:10
  */
-include("../Crafting/Store.php");
+include_once("../Crafting/Store.php");
 
 
 if( isset($_GET['request']) && ($_GET['request'] == 'get_all_stores') ){
@@ -13,35 +13,44 @@ if( isset($_GET['request']) && ($_GET['request'] == 'get_all_stores') ){
     $store->store_fetch_all();
 }
 
-if( isset($_GET['request']) && ($_GET['request'] == 'search') ){
-    $store= Store::StoreByName($_GET['name']);
-}
 
-if( isset($_GET['request']) && ($_GET['request'] == 'add') ){
+if( isset($_POST['request']) && ($_POST['request'] == 'add') ){
 
     $row = array(
         "name" => $_POST['name'],
-        "description" =>$_POST['description'],
-        "adress" => $_POST['adress'],
-        "website" => $_POST['website'],
-        "lat" => $_POST['lat'],
-        "long" => $_POST['long'],
-        "type" => $_POST['type']
-    );
-    $row = array(
-        "code" => "ds12257dsq6qffs",
-        "name" => "test",
-        "description" =>"testing insert",
-        "adress" => "localhost",
-        "website" => "www.test-insert.com",
-        "lat" => "qsd",
-        "long" => "qqsd",
-        "type" => "dev"
+        "link" =>$_POST['link'],
+        "promotag" => $_POST['promotag'],
+        "code" => $_POST['username']
     );
 
     $store = Store::NewStore($row);
     $store->add();
-    echo "code".$store->code;
+}
+
+if( isset($_GET['request']) && ($_GET['request'] == 'check_existence') ){
+    //get request
+    //send query and test
+        //existent : response with store data
+        //none : response 'false'
+    $store = new Store();
+    $store->link = $_GET['link'];
+    $store->exist();
+}
+
+
+if( isset($_POST['request']) && ($_POST['request'] == 'check_link') ){
+    $store = new Store();
+    $store->link = $_POST['data'];
+    $store->exist();
+}
+
+if( isset($_GET['request']) && ($_GET['request'] == 'retrieve_featured') ){
+    $store = new Store();
+
+}
+if( isset($_POST['request']) && ($_POST['request'] == 'store_by_code') ){
+    $store = new Store();
+    $store->code = $_POST['data'];
 
 }
 

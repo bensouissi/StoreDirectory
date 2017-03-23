@@ -5,19 +5,21 @@
  * Date: 26/12/2016
  * Time: 10:56
  */
-include("../DataAccess/StoreData.php");
-include("../Crafting/Article.php");
+include_once("../DataAccess/StoreData.php");
+include_once("../Crafting/Article.php");
+include_once("../Crafting/User.php");
 class Store {
     public $code;
+    public $date_added;
     public $name;
     public $address;
     public $description;
-    public $lat;
-    public $longt;
+    public $link;
     public $website;
     public $type;
+    public $promotag;
+    public $user;
     public $data_access;
-    public $articles = array();
 
     function __construct()
     {
@@ -40,36 +42,54 @@ class Store {
         echo json_encode(array("data" => $data_access->search()));
     }
 
+    public static function TrustedStores(){
+        $data_access = new StoreData();
+        echo json_encode(array("data" => $data_access->get_special()));
+    }
+
     /* fill new instance of $this */
     protected function fill( array $row ) {
         // fill all properties from array
-        $this->code = uniqid(strtoupper($row['type']).'_');
+        //$this->user = new User();
+        $this->code = uniqid('STORE_');
         $this->name = $row['name'];
-        $this->description = $row['description'];
-        $this->lat = $row['lat'];
-        $this->longt = $row['long'];
-        $this->website = $row['website'];
-        $this->type = $row['type'];
+        $this->link = $row['link'];
+        $this->promotag = $row['promotag'];
+        $this->user = $row['code'];
     }
 
     /* ordering data layer to insert new db line */
     function add(){
         $this->data_access = new StoreData($this);
-        $flag['code'] = '';
-        if($this->data_access->insertDB()){
-            $flag['code'] = 1;
-        }
-        echo $this->name;
-        echo $this->data_access->store->name;
-        echo json_encode($flag);
+        //$flag['code'] = "0";
+        if($this->data_access->insertDB())
+            echo json_encode($flag['code'] = 1);
+        else
+            echo json_encode($flag['code'] = 0);
     }
 
     /* restore all stores from db (no criteria) */
     function store_fetch_all(){
+        $this->data_access = new StoreData();
         $rows =$this->data_access->search();
         echo json_encode($rows);
     }
 
+    //create a data access object
+    //send test request
+    //wait for :
+        //only one store data (requested)
+        //false statement (none existent)
+    function exist(){
+        $data_access = new StoreData($this);
+        if(!$data_access->checkLink())
+            echo json_encode($flag['code'] = 0);
+        else
+            echo json_encode($flag['code'] = 1);
+    }
+
+
+    //get articles of this
     function get_this_articles()
     {
         $this->data_access = new StoreData($this);
@@ -84,10 +104,6 @@ class Store {
     public function getAdress(){return $this->adress;}
 
     public function getDescription(){return $this->description;}
-
-    public function getLat(){return $this->lat;}
-
-    public function getLong(){return $this->long;}
 
     public function getWebsite(){return $this->website;}
 
